@@ -1,52 +1,46 @@
 from zope.interface import implements
+from ZTUtils import make_query
 
 from plone.portlets.interfaces import IPortletDataProvider
 from plone.app.portlets.portlets import base
+from plone.app.portlets.cache import render_cachekey
+
+from plone.memoize import ram
+from plone.memoize.compress import xhtml_compress
+from plone.memoize.instance import memoize
+
+from Acquisition import aq_inner
 
 from zope import schema
 from zope.formlib import form
+from zope.component import getMultiAdapter
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 
 from atreal.portlet.myrecentitems import MyRecentItemsPortletMessageFactory as _
 
 
 class IMyRecentItemsPortlet(IPortletDataProvider):
-    """A portlet
 
-    It inherits from IPortletDataProvider because for this portlet, the
-    data that is being rendered and the portlet assignment itself are the
-    same.
-    """
+    name= schema.TextLine(
+        title=_(u'Portlet title'),
+        description=_(u'The title that will be displayed to the users.'),
+        default=_(u'My recent items'),
+        required=False,
+    )
 
-    # TODO: Add any zope.schema fields here to capture portlet configuration
-    # information. Alternatively, if there are no settings, leave this as an
-    # empty interface - see also notes around the add form and edit form
-    # below.
-
-    # some_field = schema.TextLine(title=_(u"Some field"),
-    #                              description=_(u"A field to use"),
-    #                              required=True)
+    count = schema.Int(title=_(u'Number of items to display'),
+                       description=_(u'How many items to list.'),
+                       required=True,
+                       default=5)
 
 
 class Assignment(base.Assignment):
-    """Portlet assignment.
-
-    This is what is actually managed through the portlets UI and associated
-    with columns.
-    """
 
     implements(IMyRecentItemsPortlet)
 
-    # TODO: Set default values for the configurable parameters here
-
-    # some_field = u""
-
-    # TODO: Add keyword parameters for configurable parameters here
-    # def __init__(self, some_field=u""):
-    #    self.some_field = some_field
-
-    def __init__(self):
-        pass
+    def __init__(self, name=u'My recent items', count=5):
+        self.name=name
+        self.count=count
 
     @property
     def title(self):
@@ -56,15 +50,66 @@ class Assignment(base.Assignment):
         return "My recent items"
 
 
+def _render_cachekey(fun, self):
+    if self.anonymous:
+        raise ram.DontCache()
+    return render_cachekey(fun, self)
+
+
 class Renderer(base.Renderer):
-    """Portlet renderer.
 
-    This is registered in configure.zcml. The referenced page template is
-    rendered, and the implicit variable 'view' will refer to an instance
-    of this class. Other methods can be added and referenced in the template.
-    """
+    _template = ViewPageTemplateFile('myrecentitemsportlet.pt')
+    
+    def __init__(self, *args):
+        base.Renderer.__init__(self, *args)
 
-    render = ViewPageTemplateFile('myrecentitemsportlet.pt')
+        context = aq_inner(self.context)
+        portal_state = getMultiAdapter((context, self.request), name=u'plone_portal_state')
+        self.anonymous = portal_state.anonymous()
+        self.member = portal_state.member()
+        self.portal_url = portal_state.portal_url()
+        self.typesToShow = portal_state.friendly_types()
+
+        plone_tools = getMultiAdapter((context, self.request), name=u'plone_tools')
+        self.catalog = plone_tools.catalog()
+    
+
+    @ram.cache(_render_cachekey)
+    def render(self):
+        return xhtml_compress(self._template())
+
+
+    @property
+    def available(self):
+        return not self.anonymous and len(self._data())
+
+
+    def getTitle(self):
+        return self.data.name or _(u'My recent items')
+
+
+    def recent_items(self):
+        return self._data()
+
+
+    def all_my_recent_items_link(self):
+        return '%s/search?%s' % (self.portal_url, make_query(self._buildQuery()))
+
+
+    @memoize
+    def _data(self):
+        limit = self.data.count
+        return self.catalog(self._buildQuery())[:limit]
+
+
+    def _buildQuery(self):
+        """ Build a dict used for the catalog search """
+        query = dict(Creator=self.member.id,
+                    portal_type=self.typesToShow,
+                    sort_on='modified',
+                    sort_order='reverse')
+        return query
+
 
 
 class AddForm(base.AddForm):
@@ -75,24 +120,11 @@ class AddForm(base.AddForm):
     constructs the assignment that is being added.
     """
     form_fields = form.Fields(IMyRecentItemsPortlet)
+    label = _(u"Add My recent items Portlet")
+    description = _(u"This portlet displays recent items of the current user.")
 
     def create(self, data):
         return Assignment(**data)
-
-
-# NOTE: If this portlet does not have any configurable parameters, you
-# can use the next AddForm implementation instead of the previous.
-
-# class AddForm(base.NullAddForm):
-#     """Portlet add form.
-#     """
-#     def create(self):
-#         return Assignment()
-
-
-# NOTE: If this portlet does not have any configurable parameters, you
-# can remove the EditForm class definition and delete the editview
-# attribute from the <plone:portlet /> registration in configure.zcml
 
 
 class EditForm(base.EditForm):
@@ -102,3 +134,5 @@ class EditForm(base.EditForm):
     zope.formlib which fields to display.
     """
     form_fields = form.Fields(IMyRecentItemsPortlet)
+    label = _(u"Modify My recent items Portlet")
+    description = _(u"This portlet displays recent items of the current user.")
