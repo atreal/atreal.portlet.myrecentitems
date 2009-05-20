@@ -24,7 +24,7 @@ class IMyRecentItemsPortlet(IPortletDataProvider):
     name= schema.TextLine(
         title=_(u'Portlet title'),
         description=_(u'The title that will be displayed to the users.'),
-        default=_(u'My recent items'),
+        default=_(u"My recent items"),
         required=False,
     )
 
@@ -38,7 +38,7 @@ class Assignment(base.Assignment):
 
     implements(IMyRecentItemsPortlet)
 
-    def __init__(self, name=u'My recent items', count=5):
+    def __init__(self, name=_(u"My recent items"), count=5):
         self.name=name
         self.count=count
 
@@ -47,7 +47,7 @@ class Assignment(base.Assignment):
         """This property is used to give the title of the portlet in the
         "manage portlets" screen.
         """
-        return "My recent items"
+        return self.name
 
 
 def _render_cachekey(fun, self):

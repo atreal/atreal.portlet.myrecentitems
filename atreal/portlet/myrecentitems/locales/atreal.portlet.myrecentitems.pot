@@ -1,0 +1,61 @@
+# --- PLEASE EDIT THE LINES BELOW CORRECTLY ---
+# SOME DESCRIPTIVE TITLE.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2009-05-20 10:03+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"Language-Code: en\n"
+"Language-Name: English\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"Domain: atreal.portlet.myrecentitems\n"
+
+#: ../myrecentitemsportlet.py:123
+msgid "Add My recent items Portlet"
+msgstr ""
+
+#: ../myrecentitemsportlet.py:32
+msgid "How many items to list."
+msgstr ""
+
+#: ../myrecentitemsportlet.py:137
+msgid "Modify My recent items Portlet"
+msgstr ""
+
+#: ../myrecentitemsportlet.py:88
+msgid "My recent items"
+msgstr ""
+
+#: ../myrecentitemsportlet.py:31
+msgid "Number of items to display"
+msgstr ""
+
+#: ../myrecentitemsportlet.py:25
+msgid "Portlet title"
+msgstr ""
+
+#: ../myrecentitemsportlet.py:26
+msgid "The title that will be displayed to the users."
+msgstr ""
+
+#: ../myrecentitemsportlet.py:138
+msgid "This portlet displays recent items of the current user."
+msgstr ""
+
+#. Default: "All recent changes"
+#: ../myrecentitemsportlet.pt
+msgid "box_more_recently_changed"
+msgstr ""
+
+#. Default: "No items changed yet."
+#: ../myrecentitemsportlet.pt
+msgid "box_recent_no_items"
+msgstr ""
+

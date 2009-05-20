@@ -1,5 +1,5 @@
 <dl class="portlet portletMyRecentItemsPortlet"
-    i18n:domain="plone">
+    i18n:domain="atreal.portlet.myrecentitems">
 
     <dt class="portletHeader">
         <span class="portletTopLeft"></span>
